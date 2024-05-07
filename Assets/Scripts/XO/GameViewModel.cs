@@ -1,6 +1,9 @@
 ﻿using System.Linq;
+using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using VContainer;
 
@@ -9,6 +12,7 @@ namespace XO
     public sealed class GameViewModel : MonoBehaviour
     {
         [SerializeField] private Button[] _buttons;
+        [SerializeField] private Canvas _canvasWin;
         private GameField _gameField;
         private Turn _currentTurn;
 
@@ -20,6 +24,21 @@ namespace XO
 
         private void OnEnable()
         {
+             _gameField.OnWinner(async (winner) =>
+            {
+                foreach (var button in _buttons)
+                {
+                    button.interactable = false;
+                    _canvasWin.gameObject.SetActive(true);
+                    _canvasWin.GetComponentInChildren<TMP_Text>().text = "Win " + winner.Name;
+                    _canvasWin.GetComponentInChildren<RawImage>().transform.DOScale(new Vector3(4f,4f,4f),3f);
+                    await UniTask.Delay(2000);
+                    _canvasWin.gameObject.SetActive(false);
+                    SceneManager.LoadSceneAsync("Scenes/SampleScene");
+                }
+            });
+
+
             foreach (var (button, cell) in _buttons.Select(static (button, i) => (button, new Vector2Int(x:i / 3, y: i % 3))))
             {
                 button.GetComponentInChildren<TMP_Text>().text = string.Empty;
@@ -33,17 +52,12 @@ namespace XO
                         return;
                     }
 
-                    if (_currentTurn is Turn.Cross)
-                    {
-                        componentInChildren.color = Color.green;
-                    }
-                    else
-                    {
-                        componentInChildren.color = Color.red;
-                    }
-
                     button.GetComponentInChildren<TMP_Text>().text = turn.Name;
                     button.interactable = false;
+                });
+                button.onClick.AddListener(() =>
+                {
+                    componentInChildren.color = _currentTurn is Turn.Cross ? Color.green : Color.red;
                 });
             }
         }

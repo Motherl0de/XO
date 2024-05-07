@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -10,6 +11,7 @@ namespace XO
     {
         private readonly Turn[,] _turns = new Turn[3, 3];
         private int _counter;
+        private Action _moveExecuted;
 
         public bool TryMakeTurn(Vector2Int cell, Turn turn, out IEnumerable<Vector2Int> cells)
         {
@@ -27,7 +29,19 @@ namespace XO
             }
 
             cells = AvailableCells();
+            _moveExecuted?.Invoke();
             return true;
+        }
+
+        public void OnWinner(Action<Turn> whenWinner)
+        {
+            _moveExecuted = () =>
+            {
+                if (TryGetWinner(out var winner))
+                {
+                    whenWinner.Invoke(winner);
+                }
+            };
         }
 
         public bool TryGetWinner(out Turn candidate)
