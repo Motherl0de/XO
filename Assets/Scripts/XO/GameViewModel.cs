@@ -31,8 +31,8 @@ namespace XO
                     button.interactable = false;
                     _canvasWin.gameObject.SetActive(true);
                     _canvasWin.GetComponentInChildren<TMP_Text>().text = "Win " + winner.Name;
-                    _canvasWin.GetComponentInChildren<RawImage>().transform.DOScale(new Vector3(4f,4f,4f),3f);
-                    await UniTask.Delay(2000);
+                    _canvasWin.GetComponentInChildren<RawImage>().transform.DOScale(new Vector3(6f,6f,6f),3f);
+                    await UniTask.Delay(4000);
                     _canvasWin.gameObject.SetActive(false);
                     SceneManager.LoadSceneAsync("Scenes/SampleScene");
                 }
@@ -53,6 +53,11 @@ namespace XO
                     }
 
                     button.GetComponentInChildren<TMP_Text>().text = turn.Name;
+                    DOTween.Sequence()
+                        .Append(button.GetComponentInChildren<TMP_Text>().transform.DOScale(2f, 1f))
+                        .AppendInterval(0.2f)
+                        .Append(button.GetComponentInChildren<TMP_Text>().transform.DOScale(1f, 1f));
+
                     button.interactable = false;
                 });
                 button.onClick.AddListener(() =>
